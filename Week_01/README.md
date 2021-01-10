@@ -183,5 +183,165 @@ jconsole:
 
 ![](1610268215(1).png)
 
-jstat:
+jstat:可以查看堆内存各部分的使用量，以及加载类的数量。命令的格式如下：
+
+ jstat [-命令选项] [vmid] [间隔时间/毫秒] [查询次数]
+
+详情参见：https://www.cnblogs.com/yjd_hycf_space/p/7755633.html
+
+```
+列出当前JVM版本支持的选项，常见的有
+l  class (类加载器) 
+l  compiler (JIT) 
+l  gc (GC堆状态) 
+l  gccapacity (各区大小) 
+l  gccause (最近一次GC统计和原因) 
+l  gcnew (新区统计)
+l  gcnewcapacity (新区大小)
+l  gcold (老区统计)
+l  gcoldcapacity (老区大小)
+l  gcpermcapacity (永久区大小)
+l  gcutil (GC统计汇总)
+l  printcompilation (HotSpot编译统计)
+```
+
+
+
+```
+ps -ef|grep java | grep xxx
+jstat -gc -t 11656 10000 30 
+-gc ：将显示与垃圾收集相关的统计信息
+自JVM启动以来的-t时间戳将被打印
+11656：目标JVM进程ID
+10000：每10,000毫秒（即10秒）将打印一次统计信息。
+30 ：将打印30次迭代的统计信息。 因此，以上选项将导致JVM打印指标300秒（即10秒x 30次迭代）。
+```
+
+![image-20210110165453408](image-20210110165453408.png)
+
+```
+S0C –S0区域的容量，以KB为单位
+S1C –S1区域的容量，以KB为单位
+S0U –S0区域使用的空间以KB为单位
+S1U –S1区域以KB为单位使用空间
+EC –新生代容量（KB）
+EU –新生代已利用空间（以KB为单位）
+OC –老年代容量（KB）
+OU –老年代的已利用空间，以KB为单位
+MC –元空间区域容量，以KB为单位
+MU –元空间区域使用的空间以KB为单位
+CCSC –压缩类空间CCS区域的容量，以KB为单位
+CCSU –压缩类空间CCS区域以KB为单位使用空间
+YGC  –迄今为止发生的年轻代GC事件的数量
+YGCT –到目前为止，年轻代GC花费的时间
+FGC  –迄今为止已发生的完全GC事件的数量
+FGCT –到目前为止已花费的完整GC时间
+GCT  –到目前为止所花费的GC时间总量（基本上是YGCT + FGCT）
+```
+
+jstack:用于打印出给定的java进程ID或core file或远程调试服务的Java堆栈信息，如果是在64位机器上，需要指定选项"-J-d64"，
+
+Windows的jstack使用方式只支持以下的这种方式：jstack [-l] pid
+
+如果java程序崩溃生成core文件，jstack工具可以用来获得core文件的java stack和native stack的信息，从而可以轻松地知道java程序是如何崩溃和在程序何处发生问题。另外，jstack工具还可以附属到正在运行的java程序中，看到当时运行的java程序的java stack和native stack的信息, 如果现在运行的java程序呈现hung的状态，jstack是非常有用的。
+
+参见：https://www.cnblogs.com/xingzc/p/5778010.html
+
+http://www.blogjava.net/jzone/articles/303979.html
+
+http://blog.csdn.net/fenglibing/article/details/6411940
+
+```
+需要注意的问题:
+
+l 不同的 JAVA虚机的线程 DUMP的创建方法和文件格式是不一样的，不同的 JVM版本， dump信息也有差别。
+
+l 在实际运行中，往往一次 dump的信息，还不足以确认问题。建议产生三次 dump信息，如果每次 dump都指向同一个问题，我们才确定问题的典型性。 
+
+2、命令格式
+
+$jstack [ option ] pid
+
+$jstack [ option ] executable core
+
+$jstack [ option ] [server-id@]remote-hostname-or-IP
+
+参数说明:
+
+pid: java应用程序的进程号,一般可以通过jps来获得;
+
+executable:产生core dump的java可执行程序;
+
+core:打印出的core文件;
+
+remote-hostname-or-ip:远程debug服务器的名称或IP;
+
+server-id: 唯一id,假如一台主机上多个远程debug服务;
+```
+
+
+
+jmap:可以输出所有内存中对象的工具，甚至可以将VM 中的heap，以二进制输出成文本。
+
+　　打印出某个java进程（使用pid）内存内的，所有‘对象’的情况（如：产生那些对象，及其数量）。
+
+64位机上使用需要使用如下方式：
+
+```
+jmap -J-d64 -heap 5716
+```
+
+![image-20210110172045975](image-20210110172045975.png)
+
+解析结果：
+
+```
+using parallel threads in the new generation.  ##新生代采用的是并行线程处理方式
+using thread-local object allocation.   
+Concurrent Mark-Sweep GC   ##同步并行垃圾回收 
+
+Heap Configuration:  ##堆配置情况，也就是JVM参数配置的结果[平常说的tomcat配置JVM参数，就是在配置这些]
+   MinHeapFreeRatio = 40 ##最小堆使用比例
+   MaxHeapFreeRatio = 70 ##最大堆可用比例
+   MaxHeapSize      = 2147483648 (2048.0MB) ##最大堆空间大小
+   NewSize          = 268435456 (256.0MB) ##新生代分配大小
+   MaxNewSize       = 268435456 (256.0MB) ##最大可新生代分配大小
+   OldSize          = 5439488 (5.1875MB) ##老年代大小
+   NewRatio         = 2  ##新生代比例
+   SurvivorRatio    = 8 ##新生代与suvivor的比例
+   PermSize         = 134217728 (128.0MB) ##perm区 永久代大小
+   MaxPermSize      = 134217728 (128.0MB) ##最大可分配perm区 也就是永久代大小
+
+Heap Usage: ##堆使用情况【堆内存实际的使用情况】
+New Generation (Eden + 1 Survivor Space):  ##新生代（伊甸区Eden区 + 幸存区survior(1+2)空间）
+   capacity = 241631232 (230.4375MB)  ##伊甸区容量
+   used     = 77776272 (74.17323303222656MB) ##已经使用大小
+   free     = 163854960 (156.26426696777344MB) ##剩余容量
+   32.188004570534986% used ##使用比例
+Eden Space:  ##伊甸区
+   capacity = 214827008 (204.875MB) ##伊甸区容量
+   used     = 74442288 (70.99369812011719MB) ##伊甸区使用
+   free     = 140384720 (133.8813018798828MB) ##伊甸区当前剩余容量
+   34.65220164496263% used ##伊甸区使用情况
+From Space: ##survior1区
+   capacity = 26804224 (25.5625MB) ##survior1区容量
+   used     = 3333984 (3.179534912109375MB) ##surviror1区已使用情况
+   free     = 23470240 (22.382965087890625MB) ##surviror1区剩余容量
+   12.43827838477995% used ##survior1区使用比例
+To Space: ##survior2 区
+   capacity = 26804224 (25.5625MB) ##survior2区容量
+   used     = 0 (0.0MB) ##survior2区已使用情况
+   free     = 26804224 (25.5625MB) ##survior2区剩余容量
+   0.0% used ## survior2区使用比例
+PS Old  Generation: ##老年代使用情况
+   capacity = 1879048192 (1792.0MB) ##老年代容量
+   used     = 30847928 (29.41887664794922MB) ##老年代已使用容量
+   free     = 1848200264 (1762.5811233520508MB) ##老年代剩余容量
+   1.6416783843721663% used ##老年代使用比例
+Perm Generation: ##永久代使用情况
+   capacity = 134217728 (128.0MB) ##perm区容量
+   used     = 47303016 (45.111671447753906MB) ##perm区已使用容量
+   free     = 86914712 (82.8883285522461MB) ##perm区剩余容量
+   35.24349331855774% used ##perm区使用比例
+```
 
