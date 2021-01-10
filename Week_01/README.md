@@ -170,7 +170,9 @@ MyClassLoaderFile.java
 
 3（必做）、画一张图，展示 Xmx、Xms、Xmn、Metaspache、DirectMemory、Xss这些内存参数的关系。
 
-地址：作业3-JVM内存.png
+![](1610271156(1).png)
+
+
 
 # 第一课第4题
 
