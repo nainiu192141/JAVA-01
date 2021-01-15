@@ -1,5 +1,7 @@
 学习笔记	
 
+# 第一课
+
 ## 一、常用性能维度
 
 1. 延迟(Latency)： 一般衡量的是响应时间(Response Time)，比如平均响应时间。
@@ -345,5 +347,236 @@ Perm Generation: ##永久代使用情况
    used     = 47303016 (45.111671447753906MB) ##perm区已使用容量
    free     = 86914712 (82.8883285522461MB) ##perm区剩余容量
    35.24349331855774% used ##perm区使用比例
+```
+
+# 二、第二课
+
+java命令
+  开发部署运行命令行：
+    java:启动Java应用程序
+    javac:JDK内置的编译工具
+    javap:反编译class文件的工具，用助记符的方式看字节码
+    javah:JNI开发时，根据java代码生成需要的.h文件
+    jar:打包工具，可以将文件和目录打包成jar包。使用时按照顺序对应好参数和选项即可。
+    javadoc:根据java代码和标准注释生成API说明文档
+    extcheck:检查某个jar或者运行时扩展jar有没有版本冲突，很少使用
+    jdb:Java Debugger;可以调试本地或远端程序。属于JPDA的一个demo实现，用于其他调试器参考，很少使用
+    jdeps:探测class或者jar包的需要的依赖
+    keytool:安全证书和秘钥的管理工具（支持导入，导出，生成等操作）
+    jarsigner:jar文件签名和验证工具
+    policytool:图形界面工具，管理本机的java安全策略
+  辅助工具命令行：
+    jps/jinfo:查看java进程
+      jps:显示进程pid
+      jps -l:显示类jar包和pid
+      jps -mlv:详细进程信息和对应命令行参数和pid
+
+    jstat:查看JVM内部gc相关信息，可持续观测gc每秒情况
+      jstat -gc pid 1000 10 :查看gc情况，每1秒打一次，打10次
+      jstat -gcutil pid 1000 10:显示gc百分比情况
+      jstat -gcnew pid 1000 10 :只看yang区,-gcold只看old区
+    
+    jmap:查看heap或者类占用空间统计
+      jmap -heap pid:打印堆内存（内存池）的配置和使用信息。
+      jmap -histo pid >aaa.txt:看哪些类占用的空间最多，实例数和类型
+      jmap -dump:format=b,file=xxx.hprof pid: Dump堆内存
+    
+    jstack:查看线程信息
+    jstack -l :线程信息详情
+    
+    jcmd:执行JVM相关分析命令（整合命令）
+      jcmd pid help:查看各种命令行如下
+        The following commands are available:
+        JFR.stop
+        JFR.start
+        JFR.dump
+        JFR.check
+        VM.native_memory
+        VM.check_commercial_features
+        VM.unlock_commercial_features
+        ManagementAgent.stop
+        ManagementAgent.start_local
+        ManagementAgent.start
+        VM.classloader_stats
+        GC.rotate_log
+        Thread.print
+        GC.class_stats
+        GC.class_histogram
+        GC.heap_dump
+        GC.finalizer_info
+        GC.heap_info
+        GC.run_finalization
+        GC.run
+        VM.uptime
+        VM.dynlibs
+        VM.flags
+        VM.system_properties
+        VM.command_line
+        VM.version
+        help
+      jcmd pid GC.heap_info
+    
+    jrunscript/jjs:执行js命令,当curl命令使用：
+      jrunscript -e "cat('http:www.baidu.com')"
+      jrunscript -e "print('hello,kk,sdsd'+1)"
+      jrunscript -l js -f /XXX/XXX/test.js
+      jjs:进入命令行
+    kill -3 pid:发送信号3给进程，打印出堆栈
+    kill -9 pid:发送信号9给进程，关闭进程
+
+  图形工具：
+  jconsole:图形界面查看堆和非堆内存使用情况，cpu占用率，线程和类，检测死锁
+  jvisualvm:cpu，堆栈，类，线程，还可以看Profiler抽样，一段时间内发生的方法，类调用比较多，创建的对象
+  visualGC:插件，idea插件中安装
+  jmc：比较强大，参数较多，还有统计计算功能，飞行记录器保存文件。线上不建议使用，线上使用可能造成各种问题，干扰正在运行的服务
+
+GC原理：内存资源有限性，因此需要大家共享使用，手工申请，手动释放。
+        但实际情况复杂，对象之间互相依赖引用，导致无法释放内存
+  分代假设：大部分新生对象很快无用；存活较长时间的对象，可能存活更长时间
+  改进：内存池分代，年轻代（新生代，S0,S1，8:1:1），老年代，不同类型对象不同区域，不同策略处理
+        YoungGC（minor）的时候将新生代存活的（极少）和S0中合并复制入S1,然后清空新生代和S0。下次相反，将新生代存活的和S1中存活的对象复制放入S0,然后清空新生代和S1.如果15次younggc还在的移动到老年代。参考 -XX: +MaxTenuringThread=15
+        持久代/元数据区
+        1.8之前： -XX:MaxPermSize=256m
+        1.8之后： -XX:MaxMetaspaceSize=256m
+        为什么新生代对象是复制到存活区，对象到老年代是移动方式？？？
+  可以作为GC Roots的对象
+    1.当前正在执行方法的局部变量和入参
+    2.活动线程
+    3.所有类的静态字段
+    4.JNI引用
+    标记此阶段暂停的时间，与堆内存大小，对象的总数没有直接关系，而是由存活对象（可达对象）的数量决定的。所以，增加堆内存的大小并不会直接影响标记阶段占用的时间。标记阶段时间很快
+
+
+
+  改进：引用计数改为引用跟踪
+    标记清除算法（Mark-Sweep）：
+      Marking(标记)：遍历所有可达对象，并在本地内存（native）中分门别类几下。
+      Sweeping（清除）：这一步保证了，不可达对象所占内存，在之后进行内存分配时可以重用。
+      并行GC和CMS GC （Concurrence Mark sweep）使用了此原理
+      优势：可以处理循环依赖，只扫描部分对象
+      除了清除，还要压缩
+      怎么才能标记和清除清楚上百万对象呢？答案就是STW(stop total world)，让全世界停止下来.
+    标记复制算法（Mark-Copy）：对yuoung区快
+
+    标记清除整理算法(Mark-Sweep-Compact)：对old区比较好
+    
+    各有什么优缺点：
+
+串行GC(Serial GC)/ParNewGC
+  -XX: +UseSerialGC 参数配置串行GC
+  串行GC对年轻代使用标记复制算法，对老年代使用标记清除整理算法
+  两者都是单线程的垃圾收集器，不能进行并行处理，所以，会触发权限暂停STW
+  因此这种GC算法不能充分利用多核CPU,不管多少CPU内核，JVM在垃圾回收时只能使用单个核心
+  效率低下，现在很少使用，比如一个保洁阿姨打扫·卫生，叫所有人出去，打扫完毕在回来。
+  只适合几百MB堆内存的JVM,而且是单核cpu时比较有用。
+  -XX: +UseParNewGC 改进版本的串行GC，可以配合CMS使用。
+
+并行GC(Parallel GC) :jdk8使用，jdk6,7,8版本jvm默认的GC,是吞吐量最大的GC
+  -XX: +UseParallelGC或者 -XX: +UseParallelOldGC 或者 -XX: +UseParallelGC -XX: +UseParallelOldGC 三者是一样的
+  并行GC对年轻代使用标记复制算法，对老年代使用标记清除整理算法
+  -XX: ParallelGCThreads=N 来指定GC线程数，其默认值为CPU核心数。
+  年轻代和老年代的垃圾回收都会触发暂停STW事件。
+  比如多个保洁阿姨打扫卫生，叫所有人出去停止工作，快速打扫完毕在回来。
+  并行适用于多核服务器，主要目标是增加吞吐量。因为对系统资源的有效使用，能达到额公告的吞吐量：
+    -在GC期间，所有cpu内核都在并行清理垃圾，所以，总暂停事件更短
+    -在两次GC周期的间隔期，没有GC线程在运行，不会消耗任何系统资源。
+
+并发GC CMS GC(Mostly Concurrent Mark and Sweep Garbage Collectopr)
+  适合要求低延迟，不要求大吞吐量的系统，要求大吞吐量还是要用并行GC
+  -XX: +UseConcMarkSweepGC
+  其对年轻代采用并行STW方式的标记复制算法，对老年代主要使用并发标记清除算法。
+  CMS GC的设计目标是避免在老年代垃圾收集时出现长时间的卡顿，主要是通过两种手段来达成此目标：、
+    1.不对老年代进行整理，而是使用空闲列表（free-lists）来管理内存空间的回收。
+    2.在标记清除阶段的大部分工作是和应用程序一起并发执行。
+    也就是说，在这些阶段并没有明显的应用现场暂停。但仍然和应用线程争抢CPU时间。默认情况下，CMS使用的并发线程数等于cpu核心数的1/4.3/4的还是留给业务使用。
+    比如一群阿姨打扫卫生时，同时可以工作，不用出去。
+    如果服务器是多核的，并且主要调优目标是降低GC停顿导致的系统延迟，那么采用CMS是个明智的选择。进行老年代的并发回收时，可能伴随着多次年轻代的minor GC.
+  6个阶段：详见ppt课件
+    1.初始化标记
+    2.并发标记
+    3.并发预清理
+    4.最终标记
+    5.并发清除
+    6.并发重置
+
+    思考：并行Parallel与并发Concurrent的区别？
+
+G1 GC(Garbage-First)，垃圾优先，哪块垃圾最多就优先清理它
+  -XX: +UseG1GC -XX:MaxGCPauseMillis=T 调整暂停时间，达到多次GC，每次回收部分内存。
+  目标：将STW停顿的时间和分布，变成可预期可配置的。
+  堆不再分成年轻代和老年代，而是划分多个（2048个）可以存放对象的小块堆区域（smaller heap regions）.每个小块，可能会被定义成Eden区，一会又被指定为Survivor区或者Old区。在逻辑上，所有Eden区和Survivor区合起来成为年轻代，所有old区合起来就是老年代。
+  每次处理一部分，优先处理垃圾占比比较大的区域，每次GC暂停会处理所有年轻代的内存块，但一般只处理部分老年代的内存区域块。
+  原则：垃圾最多占比（存活的对象总数/整体总对象）的小块会被优先回收。
+  参数：具体见ppt
+  注意事项：容易退化成串行GC，暂停时间甚至达到秒级
+    1）并发模式失败，老年代被填满，增加堆大小或者调整周期（增加线程数 -XX: ConctThreads）
+    2）晋升失败,m没有足够的内存供存活对象或晋升对象使用，由此出发FullGC
+        解决办法：
+          a) 增加 -XX: G1ReservePercent 选项的值（并相应增加总的堆大小）增加预留内存量
+          b) 通过减少 -XX: initiatingHeapOccupancyPercent 提前启动标记周期
+          c) 也可以通过增加 -XX: ConcGCThreads选项的值来增加并行标记现场的数量。
+    3）巨型对象分配失败，当巨型对象找不到合适的空间进行分配时，就会启动FullGC,来释放空间。
+        解决办法：
+          增加内存或者增大 -XX: G1HeapRegionSize
+
+ZGC:jdk11,oracle开发，亲儿子，立项晚但开发快，从8迁移到11,改rt.jar(被拆分)配置就可以
+
+```
+1.GC最大停顿时间不超过10ms
+2.堆内存支持范围广，从几百兆的堆空间到4TB的超大堆空间内存（JDK13升至16TB）
+3.与G1比，吞吐量下降15%，比并行会更进一步下降
+4.当前只支持linux/x64位平台，jdk15后才支持mac和windows系统
+```
+
+ShenandoahGC：本质和特性与ZGC相同jdk12，红帽开发，做的慢。linux上支持到8就可以用，其他系统不行。
+
+ZGC和仙那度GC共同鼻祖：azul的PausenessGC,效果很好，延迟在1毫秒以内。mac和windows中要jdk15版本才能用上边的GC
+
+各种GC对比
+
+![image-20210115194850549](image-20210115194850549.png)
+
+各GC组合：
+
+![image-20210115195051015](image-20210115195051015.png)
+
+如何选择GC?经过压测尝试比较后选择，理论原则只能指导生产，不能决定生产。
+
+![image-20210115195611871](image-20210115195611871.png)
+
+jdk8：长期维护版本，还可以用5-8年
+		jdk11:下一个长期维护版本
+		jdk15：
+		jdk17:下下个长期维护版本
+		每半年发一个版本
+各版本GC的暂停时间STW比较:
+
+![image-20210115201708304](image-20210115201708304.png)
+
+GC总结：
+
+![image-20210115202252760](image-20210115202252760.png)
+
+![image-20210115202324946](image-20210115202324946.png)
+
+## 作业：
+
+1、本机使用 G1 GC 启动一个程序，仿照课上案例分析一下 JVM 情况，可以使用gateway-server-0.0.1-SNAPSHOT.jar
+			 注意关闭自适应参数：-XX:-UseAdaptiveSizePolicy 防止jvm被jvm自动调整。
+			启动参数：-XX: +UseAdaptiveSizePolicy 由jvm来自动调整各参数
+
+```bash
+java -Xmx1g -Xms1g -XX:-UseAdaptiveSizePolicy -XX:+UseSerialGC  -jar target/gateway-server-0.0.1-SNAPSHOT.jar
+java -Xmx1g -Xms1g -XX:-UseAdaptiveSizePolicy -XX:+UseParallelGC -jar target/gateway-server-0.0.1-SNAPSHOT.jar
+java -Xmx1g -Xms1g -XX:-UseAdaptiveSizePolicy -XX:+UseConcMarkSweepGC -jar target/gateway-server-0.0.1-SNAPSHOT.jar
+java -Xmx1g -Xms1g -XX:-UseAdaptiveSizePolicy -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -jar target/gateway-server-0.0.1-SNAPSHOT.jar
+使用jmap，jstat，jstack，以及可视化工具，查看jvm情况。
+mac上可以用wrk，windows上可以按照superbenchmark压测 http://localhost:8088/api/hello 查看jvm。
+```
+
+分析结果参见：
+
+```
+第一周第2课作业.txt
 ```
 

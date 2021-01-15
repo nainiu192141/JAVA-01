@@ -1,0 +1,173 @@
+1.使用以下命令启动应用，设置gc为g1，关掉自适应调整参数开关，最大停顿为50毫秒
+java -Xmx1g -Xms1g -XX:-UseAdaptiveSizePolicy -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -jar E:\学习\极客学习\java进阶训练营\软件\JDK\gateway-server-0.0.1-SNAPSHOT.jar
+-------------------------------
+2.然后使用jps命令查看Java进程，见图片，得到进程号为12368
+D:\Java\jdk1.8.0_221\bin>jps -l
+12368 E:\学习\极客学习\java进阶训练营\软件\JDK\gateway-server-0.0.1-SNAPSHOT.jar
+28984 sun.tools.jps.Jps
+35512
+24604 D:\nexus-3.15.2-01-win64\nexus-3.15.2-01\bin\nexus.exe
+27628 org.jetbrains.jps.cmdline.Launcher
+=================================
+3.使用jmap命令查看进程的堆信息，其中MaxNewSize是堆内存的0.6，这个数据是怎么来的？
+D:\Java\jdk1.8.0_221\bin>jmap -heap 12368
+Attaching to process ID 12368, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 25.221-b11
+
+using thread-local object allocation.
+Garbage-First (G1) GC with 10 thread(s)  --使用的是G1GC，线程数是10
+
+Heap Configuration:
+   MinHeapFreeRatio         = 40  --默认堆最小空闲比
+   MaxHeapFreeRatio         = 70  --默认堆最大空闲比
+   MaxHeapSize              = 1073741824 (1024.0MB) --最大堆内存，-Xmx1g设定
+   NewSize                  = 1363144 (1.2999954223632812MB)  --新生代初始大小，由-XX:NewSize或-Xmn设定
+   MaxNewSize               = 643825664 (614.0MB) --最大新生代大小，默认最大堆内存的60%，可由-XX:MaxNewSize设置
+   OldSize                  = 5452592 (5.1999969482421875MB)  --老年代初始大小，可由-XX:OldSize设置
+   NewRatio                 = 2  --老年代与新生代比例，2表示新生代占1/(2+1)=1/3,可由-XX:NewRatio设置
+   SurvivorRatio            = 8  --存活区与eden比例，8表示存活区占(1+1)/(8+1+1)=2/10，可由-XX:SurvivorRatio设置
+   MetaspaceSize            = 21807104 (20.796875MB)  --元空间大小，可由-XX:MetaspaceSize设置
+   CompressedClassSpaceSize = 1073741824 (1024.0MB)  --压缩类空间大小，默认大小为1G，可由-XX:CompressedClassSpaceSize设置
+   MaxMetaspaceSize         = 17592186044415 MB  --最大元空间大小，可由-XX:MaxMetaspaceSize设置，该值很大，等效于无穷大
+   G1HeapRegionSize         = 1048576 (1.0MB)  --堆每块大小，可由-XX:G1HeapRegionSize设置，必须为2的次方，1,2,4,8..最大值32MB
+
+Heap Usage:
+G1 Heap:
+   regions  = 1024  --快大小
+   capacity = 1073741824 (1024.0MB)  --堆容量
+   used     = 108658384 (103.62471008300781MB)  --使用了103M=74+26+3
+   free     = 965083440 (920.3752899169922MB)  --空闲1024M-103M
+   10.119600594043732% used  --使用比例103/1024
+G1 Young Generation:
+Eden Space:
+   regions  = 74  --分配区块
+   capacity = 192937984 (184.0MB)  --当前Eden区大小
+   used     = 77594624 (74.0MB)  --Eden使用大小
+   free     = 115343360 (110.0MB)  --Eden区空闲大小
+   40.21739130434783% used  --使用比例
+Survivor Space:
+   regions  = 26  --分配区块
+   capacity = 27262976 (26.0MB)  --当前存活区大小
+   used     = 27262976 (26.0MB)  --存活区使用大小
+   free     = 0 (0.0MB)  --存活区空闲大小
+   100.0% used
+G1 Old Generation:
+   regions  = 5  --分配快数
+   capacity = 853540864 (814.0MB)  --当前老年代容量？？？
+   used     = 3800784 (3.6247100830078125MB)
+   free     = 849740080 (810.3752899169922MB)
+   0.44529607899358875% used
+
+16110 interned Strings occupying 2183264 bytes.
+分析：G1GC的老年代Capacity大小和MaxNewSize大小没有严格按照比率2来划分，大概是Eden:184+Surv:26+Old:814=Heap:1024
+==========================
+D:\Java\jdk1.8.0_221\bin>jmap -histo 12368
+-- 该命令查看jvm堆中目前创建的对象，对应的数量，对应的空间，从大到小排序,其中字符数组，整型数组和字节数组占前三位
+ num     #instances         #bytes  class name
+----------------------------------------------
+   1:        270722       60608696  [C
+   2:         14792       12917288  [I
+   3:          8645        9600216  [B
+   4:        169537        4068888  java.lang.String
+   5:         25459        2240392  java.lang.reflect.Method
+   6:         65226        1345216  [Ljava.lang.Class;
+   7:         19794        1266816  java.net.URL
+   8:         19689        1258232  [Ljava.lang.Object;
+   9:          9868         868688  [Ljava.util.HashMap$Node;
+  10:          7114         789968  java.lang.Class
+====================================
+D:\Java\jdk1.8.0_221\bin>jstat -gc 12368 1000 3
+每秒统计一次，一共统计三次gc情况
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT
+ 0.0   26624.0  0.0   26624.0 188416.0 76800.0   833536.0    3711.7   34224.0 32629.6 4528.0 4178.4      6    0.035   0      0.000    0.035
+ 0.0   26624.0  0.0   26624.0 188416.0 76800.0   833536.0    3711.7   34224.0 32629.6 4528.0 4178.4      6    0.035   0      0.000    0.035
+ 0.0   26624.0  0.0   26624.0 188416.0 76800.0   833536.0    3711.7   34224.0 32629.6 4528.0 4178.4      6    0.035   0      0.000    0.035
+
+后面带C的表示容量Capacity，U表示使用量Used。
+s0都是0,S1是26M
+eden容量188MB，使用76MB，正好对应上面的184MB，使用量比74M大一点，因为过去了一段时间使用量增长了。
+OC ,OU是老年代的容量和使用量。MC，MU是metaspace的容量和使用量。CCSC，CCSU是压缩类空间的容量和使用量。
+YGC表示young gc发生的次数6，YGCT表示累计总时间35毫秒，也就是平均每次young gc耗时0.035/6 约等于5毫秒
+FGC表示full gc次数0，FGCT表示full gc累计时间，这里都是0，表示没有发生full gc
+GCT表示所有gc总累计时间。
+
+========================================
+D:\Java\jdk1.8.0_221\bin>jstat -gcutil 12368 1000 3
+每秒统计一次，一共统计三次gc的百分比情况
+  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT
+  0.00 100.00  40.76   0.45  95.34  92.28      6    0.035     0    0.000    0.035
+  0.00 100.00  40.76   0.45  95.34  92.28      6    0.035     0    0.000    0.035
+  0.00 100.00  40.76   0.45  95.34  92.28      6    0.035     0    0.000    0.035
+
+================================================
+D:\Java\jdk1.8.0_221\bin>jstack -l 12368
+
+2021-01-16 00:07:03
+Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.221-b11 mixed mode):
+
+
+"VM Thread" os_prio=2 tid=0x000000001a82c000 nid=0x8934 runnable
+
+"Gang worker#0 (Parallel GC Threads)" os_prio=2 tid=0x0000000003589800 nid=0x88e4 runnable
+
+"Gang worker#1 (Parallel GC Threads)" os_prio=2 tid=0x000000000358c000 nid=0x84c4 runnable
+
+"Gang worker#2 (Parallel GC Threads)" os_prio=2 tid=0x000000000358e000 nid=0x8ac0 runnable
+
+"Gang worker#3 (Parallel GC Threads)" os_prio=2 tid=0x000000000358f800 nid=0x5b20 runnable
+
+"Gang worker#4 (Parallel GC Threads)" os_prio=2 tid=0x0000000003592000 nid=0x6804 runnable
+
+"Gang worker#5 (Parallel GC Threads)" os_prio=2 tid=0x0000000003593000 nid=0x809c runnable
+
+"Gang worker#6 (Parallel GC Threads)" os_prio=2 tid=0x0000000003596800 nid=0x270c runnable
+
+"Gang worker#7 (Parallel GC Threads)" os_prio=2 tid=0x0000000003597800 nid=0x5de0 runnable
+
+"Gang worker#8 (Parallel GC Threads)" os_prio=2 tid=0x000000000359a800 nid=0x8098 runnable
+
+"Gang worker#9 (Parallel GC Threads)" os_prio=2 tid=0x000000000359b800 nid=0x8088 runnable
+
+"G1 Main Concurrent Mark GC Thread" os_prio=2 tid=0x000000000360b000 nid=0x8238 runnable
+
+"Gang worker#0 (G1 Parallel Marking Threads)" os_prio=2 tid=0x000000000360c000 nid=0x5428 runnable
+
+"Gang worker#1 (G1 Parallel Marking Threads)" os_prio=2 tid=0x000000000360c800 nid=0x7fec runnable
+
+"Gang worker#2 (G1 Parallel Marking Threads)" os_prio=2 tid=0x000000000360d000 nid=0x48ac runnable
+
+"G1 Concurrent Refinement Thread#0" os_prio=2 tid=0x00000000035b9800 nid=0x7fa8 runnable
+
+"G1 Concurrent Refinement Thread#1" os_prio=2 tid=0x00000000035b9000 nid=0x1dcc runnable
+
+"G1 Concurrent Refinement Thread#2" os_prio=2 tid=0x00000000035b8000 nid=0x88d4 runnable
+
+"G1 Concurrent Refinement Thread#3" os_prio=2 tid=0x00000000035b7800 nid=0x168c runnable
+
+"G1 Concurrent Refinement Thread#4" os_prio=2 tid=0x00000000035b3800 nid=0x3aa8 runnable
+
+"G1 Concurrent Refinement Thread#5" os_prio=2 tid=0x00000000035ac800 nid=0x4738 runnable
+
+"G1 Concurrent Refinement Thread#6" os_prio=2 tid=0x00000000035a3000 nid=0x87b0 runnable
+
+"G1 Concurrent Refinement Thread#7" os_prio=2 tid=0x00000000035a2000 nid=0x63c8 runnable
+
+"G1 Concurrent Refinement Thread#8" os_prio=2 tid=0x00000000035a1000 nid=0x8134 runnable
+
+"G1 Concurrent Refinement Thread#9" os_prio=2 tid=0x00000000035a0000 nid=0x1ac0 runnable
+
+"G1 Concurrent Refinement Thread#10" os_prio=2 tid=0x000000000359d000 nid=0x46c8 runnable
+
+"VM Periodic Task Thread" os_prio=2 tid=0x000000001a960800 nid=0x88c4 waiting on condition
+查看线程信息，可以从中找到一些死锁线程，哪些线程在运行，哪些线程在等待。
+根据线上的问题，可以从中找到一些有用的信息。
+
+从中可以看到10个http-nio线程，接收http请求。
+10个Parallel GC Threads线程，1个G1 Main Concurrent Mark GC Thread线程,3个G1 Parallel Marking Threads
+11个G1 Concurrent Refinement Thread
+没有死锁。
+========================================
+图形工具jmc（飞行记录）,jvisiualVM（抽样器很好）,jconsole更直观展示GC情况
+具体图片见：jconsole界面.png，jmc界面.png,jvisualVM界面.png
