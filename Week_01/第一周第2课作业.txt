@@ -9,7 +9,7 @@ D:\Java\jdk1.8.0_221\bin>jps -l
 24604 D:\nexus-3.15.2-01-win64\nexus-3.15.2-01\bin\nexus.exe
 27628 org.jetbrains.jps.cmdline.Launcher
 =================================
-3.使用jmap命令查看进程的堆信息，其中MaxNewSize是堆内存的0.6，这个数据是怎么来的？
+3.使用jmap命令查看进程的堆信息，其中MaxNewSize是堆内存的0.6，这个数据是怎么来的？G1不是分代GC，ratio对他没用
 D:\Java\jdk1.8.0_221\bin>jmap -heap 12368
 Attaching to process ID 12368, please wait...
 Debugger attached successfully.
