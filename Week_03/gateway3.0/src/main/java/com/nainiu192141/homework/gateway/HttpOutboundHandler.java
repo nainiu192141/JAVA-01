@@ -1,5 +1,11 @@
 package com.nainiu192141.homework.gateway;
 
+import com.nainiu192141.homework.gateway.filter.HeaderHttpRequestFilter;
+import com.nainiu192141.homework.gateway.filter.HeaderHttpResponseFilter;
+import com.nainiu192141.homework.gateway.filter.HttpRequestFilter;
+import com.nainiu192141.homework.gateway.filter.HttpResponseFilter;
+import com.nainiu192141.homework.gateway.router.HttpEndpointRouter;
+import com.nainiu192141.homework.gateway.router.WeightRoundRobinHttpRouter;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,7 +36,7 @@ public class HttpOutboundHandler {
 
     private List<String> backendUrls;
     private CloseableHttpAsyncClient httpclient;
-    HttpEndpointRouter router=  new  RandomHttpRouter();
+    HttpEndpointRouter router=  new WeightRoundRobinHttpRouter();
     HttpRequestFilter filter = new HeaderHttpRequestFilter();
     HttpResponseFilter responseFilter = new HeaderHttpResponseFilter();
     public HttpOutboundHandler(List<String> backendUrls){

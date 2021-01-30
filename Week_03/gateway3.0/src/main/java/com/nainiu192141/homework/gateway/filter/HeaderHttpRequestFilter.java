@@ -1,6 +1,5 @@
-package com.nainiu192141.homework.gateway;
+package com.nainiu192141.homework.gateway.filter;
 
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 /**

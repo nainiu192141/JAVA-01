@@ -9,7 +9,7 @@ public class GatewayApplication {
     public static final String GATEWAY_NAME="NIOGateway";
     public static final String GATEWAY_VERSION="3.0.0";
     public static void main(String[] args) {
-        String backendServices = "http://localhost:8801,http://localhost:8802,http://localhost:8803";//,http://localhost:8088";
+        String backendServices = "http://localhost:8801,http://localhost:8802,http://localhost:8803";
         String[] list  = backendServices.split("\\,");
         String gatewayPort = System.getProperty("gatewayPort","8888");
 
