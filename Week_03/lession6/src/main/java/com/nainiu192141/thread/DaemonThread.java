@@ -1,5 +1,9 @@
 package com.nainiu192141.thread;
 
+/**
+ * 线程为守护线程true则不执行
+ * @author 86134
+ */
 public class DaemonThread {
 
     public static void main(String[] args) {
