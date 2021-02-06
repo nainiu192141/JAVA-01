@@ -1,4 +1,4 @@
-package com.nainiu192141.thread;
+package com.nainiu192141.example.thread;
 
 /**
  * 线程为守护线程true则不执行

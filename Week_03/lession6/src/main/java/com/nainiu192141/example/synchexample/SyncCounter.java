@@ -1,4 +1,4 @@
-package com.nainiu192141.synchexample;
+package com.nainiu192141.example.synchexample;
 
 /**
  * Created by xfx on 2021/2/2 11:08

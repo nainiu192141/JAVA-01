@@ -1,4 +1,4 @@
-package com.nainiu192141.thread;
+package com.nainiu192141.example.thread;
 
 /**
  * Created by xfx on 2021/2/2 12:31

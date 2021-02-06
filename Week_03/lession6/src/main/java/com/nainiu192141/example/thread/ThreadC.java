@@ -1,4 +1,4 @@
-package com.nainiu192141.thread;
+package com.nainiu192141.example.thread;
 
 import java.util.concurrent.Callable;
 

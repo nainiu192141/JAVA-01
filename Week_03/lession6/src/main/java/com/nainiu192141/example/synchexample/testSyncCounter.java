@@ -1,4 +1,4 @@
-package com.nainiu192141.synchexample;
+package com.nainiu192141.example.synchexample;
 
 
 /**
