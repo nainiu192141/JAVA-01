@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="student" class="com.nainiu192141.springbean.Student">
+        <property name="id" value="1111" />
+        <property name="name" value="李同学" />
+    </bean>
+    <bean id="static-method" class="com.nainiu192141.springbean.Student" factory-method="create"/>
+    <bean id="constructor" class="com.nainiu192141.springbean.Student">
+        <constructor-arg value="3"/>
+        <constructor-arg value="333"/>
+    </bean>
+    <bean id="factory-bean" class="com.nainiu192141.springbean.StudentFactoryBean"/>
+    <bean id="instance-method" class="com.nainiu192141.springbean.Student" factory-bean="studentFactory" factory-method="create"/>
+    <bean id="studentFactory" class="com.nainiu192141.springbean.ImplStudentFactory"/>
+</beans>
