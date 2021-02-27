@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.nainiu192141.springstarterautoconfigiration.SchoolAutoConfiguration
