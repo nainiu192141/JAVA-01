@@ -1,6 +1,7 @@
 package com.nainiu192141.springbean;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -28,8 +29,13 @@ public class BeanAwareDemo {
         Student student5 = (Student) context.getBean("factory-bean");
         System.out.println(student5.toString());
         //基于注解@Component
-        Student student6 = (Student) context.getBean("student");
+        ApplicationContext anno = new AnnotationConfigApplicationContext("./");
+        StudentAnno student6 = (StudentAnno) anno.getBean("student6");
         System.out.println(student6.toString());
+        //基于Configuration
+        StudentBean student7 = (StudentBean) anno.getBean("studentBean");
+        System.out.println(student7.toString());
+
     }
 
 }

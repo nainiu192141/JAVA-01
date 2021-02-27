@@ -20,7 +20,7 @@
     <bean id="instance-method" class="com.nainiu192141.springbean.Student" factory-bean="studentFactory" factory-method="create"/>
     <bean id="studentFactory" class="com.nainiu192141.springbean.ImplStudentFactory"/>
 
-    <context:component-scan base-package="com.nainiu192141.springbean"/>
+   <!-- <context:component-scan base-package="com.nainiu192141.springbean"/>-->
     <!--<context:annotation-config/>-->
 
 </beans>
