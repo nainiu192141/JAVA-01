@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3309/shop
+    username: root
+    password: 123456
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      connection-timeout: 30000
+      minimum-idle: 5
+      maximum-pool-size: 20
+      pool-name: hikari_datasource
+      connection-test-query: select 1
+      idle-timeout: 60000
+      max-lifetime: 180000
+#    type: org.springframework.jdbc.datasource.DriverManagerDataSource
+server:
+  port: 8111
