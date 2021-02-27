@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans
-        https://www.springframework.org/schema/beans/spring-beans.xsd">
-    <bean id="student" class="com.nainiu192141.springbean.Student">
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+    <bean id="student1" class="com.nainiu192141.springbean.Student">
         <property name="id" value="1111" />
         <property name="name" value="李同学" />
     </bean>
@@ -16,4 +19,8 @@
     <bean id="factory-bean" class="com.nainiu192141.springbean.StudentFactoryBean"/>
     <bean id="instance-method" class="com.nainiu192141.springbean.Student" factory-bean="studentFactory" factory-method="create"/>
     <bean id="studentFactory" class="com.nainiu192141.springbean.ImplStudentFactory"/>
+
+    <context:component-scan base-package="com.nainiu192141.springbean"/>
+    <!--<context:annotation-config/>-->
+
 </beans>

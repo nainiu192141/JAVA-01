@@ -13,7 +13,7 @@ public class BeanAwareDemo {
     public static void main(String[] args) {
         // 使用xml装配
         ApplicationContext context = new ClassPathXmlApplicationContext("classpath:/spring-context.xml");
-        Student student1 = (Student) context.getBean("student");
+        Student student1 = (Student) context.getBean("student1");
         System.out.println(student1.toString());
         //静态方法
         Student student2 = (Student) context.getBean("static-method");
@@ -27,6 +27,9 @@ public class BeanAwareDemo {
         //bean工厂
         Student student5 = (Student) context.getBean("factory-bean");
         System.out.println(student5.toString());
+        //基于注解@Component
+        Student student6 = (Student) context.getBean("student");
+        System.out.println(student6.toString());
     }
 
 }
