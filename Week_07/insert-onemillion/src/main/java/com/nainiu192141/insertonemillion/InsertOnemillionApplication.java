@@ -58,16 +58,16 @@ public class InsertOnemillionApplication {
         //改myisam引擎+ 批插入或者换InfoBright的loaddata
         //生成sql文件，source导入
         //setLocalInfileInputStream
-        insertLoadInputStream();
+        insertLoadInputStream(application);
     }
 
-    private static void insertLoadInputStream() {
+    private static void insertLoadInputStream(InsertOnemillionApplication application) {
         String testSql = "LOAD DATA LOCAL INFILE 'sql.csv' IGNORE INTO TABLE test.test (a,b,c,d,e,f)";
         InputStream dataStream = loadDataUtil.getTestDataInputStream();
         InsertOnemillionApplication dao = new InsertOnemillionApplication();
         try {
             long beginTime=System.currentTimeMillis();
-            int rows=dao.bulkLoadFromInputStream(testSql, dataStream);
+            int rows=dao.bulkLoadFromInputStream(application,testSql, dataStream);
             long endTime=System.currentTimeMillis();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -77,12 +77,13 @@ public class InsertOnemillionApplication {
      * 从流中加载数据到mysql
      * load bulk data from InputStream to MySQL
      */
-    public int bulkLoadFromInputStream(JdbcTemplate jdbcTemplate,String loadDataSql,
+    public int bulkLoadFromInputStream(InsertOnemillionApplication application,String loadDataSql,
                                        InputStream dataStream) throws SQLException {
         if(dataStream==null){
             return 0;
         }
-        Connection conn = jdbcTemplate.getDataSource().getConnection();
+        Connection conn = application.getDataSource().getConnection();
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(application.getDataSource());
         PreparedStatement statement = conn.prepareStatement(loadDataSql);
 
         int result = 0;
@@ -90,8 +91,8 @@ public class InsertOnemillionApplication {
         if (statement.isWrapperFor(Statement.class)) {
 
             PreparedStatement mysqlStatement = statement.unwrap(PreparedStatement.class);
-
-            mysqlStatement.setLocalInfileInputStream(dataStream);
+            //为什么不可用？？？
+            //mysqlStatement.setLocalInfileInputStream(dataStream);
             result = mysqlStatement.executeUpdate();
         }
         return result;
