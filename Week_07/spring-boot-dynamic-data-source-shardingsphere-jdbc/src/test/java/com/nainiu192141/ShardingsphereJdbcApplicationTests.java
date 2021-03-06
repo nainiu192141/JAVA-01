@@ -23,7 +23,7 @@ public class ShardingsphereJdbcApplicationTests {
         SysUser user = userService.findUserByFirstDb(1);
         log.info("[{}]", user.toString());
         //插入找master库
-        user.setUsername("33333");
+        user.setUsername("444");
         int qqq = userService.insertUser(user);
         //查询找slave库
         SysUser user2 = userService.findUserByFirstDb(1);
