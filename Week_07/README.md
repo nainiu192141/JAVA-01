@@ -17,6 +17,9 @@ insertLoadInputStream(application);
 
 2、（必做）读写分离-动态切换数据源版本1.0
 
-aop+AbstraactRoutingDataSource
+aop+AbstraactRoutingDataSource:
 
 3、（必做）读写分离-数据库框架版本2.0
+
+使用 ShardingSphere-jdbc 5.0.0-alpha 实现读写分离配置。
+
